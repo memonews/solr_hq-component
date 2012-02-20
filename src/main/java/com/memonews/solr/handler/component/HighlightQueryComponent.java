@@ -41,8 +41,11 @@ import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.QParser;
 
 /**
- * This search component takes all given query terms except the fielded terms and sets the highlight query directly on the <code>ResponseBuilder</code> 
- * A fielded term is defined by field by the field name followed by a colon ":" and then the term you are looking for. 
+ * This search component takes all given query terms except the fielded terms
+ * and sets the highlight query directly on the <code>ResponseBuilder</code>.
+ * 
+ * A fielded term is defined by the field name followed by a colon ":"
+ * and then the term you are looking for.
  * 
  * Since Solr 4.0
  * 
@@ -60,7 +63,7 @@ public class HighlightQueryComponent extends SearchComponent {
 
 	@Override
 	public void prepare(final ResponseBuilder rb) throws IOException {
-
+		// do nothing
 	}
 
 	@Override
@@ -102,17 +105,18 @@ public class HighlightQueryComponent extends SearchComponent {
 				}
 			}
 
-		    if(hlQuery.length() > 0) {
-		        try {
-		             QParser parser = QParser.getParser(hlQuery.toString(), null, rb.req);
-		             rb.setHighlightQuery(parser.getHighlightQuery());
-		             } catch (ParseException e) {
-		               throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
-		             }
-		    	}
-	    	}
+			if (hlQuery.length() > 0) {
+				try {
+					QParser parser = QParser.getParser(hlQuery.toString(),
+							null, rb.req);
+					rb.setHighlightQuery(parser.getHighlightQuery());
+				} catch (ParseException e) {
+					throw new SolrException(
+							SolrException.ErrorCode.BAD_REQUEST, e);
+				}
+			}
 		}
-
+	}
 
 	@Override
 	public String getDescription() {

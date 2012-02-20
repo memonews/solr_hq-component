@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2012 MeMo News AG
+ * 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.memonews.solr.handler.component;
 
 import java.util.Arrays;
@@ -10,6 +29,11 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * 
+ * Test class for the <code>HighlightQueryComponent</code>.
+ * 
+ */
 public class HighlightQueryComponentTest extends SolrTestCaseJ4 {
 
 	@BeforeClass
@@ -38,98 +62,104 @@ public class HighlightQueryComponentTest extends SolrTestCaseJ4 {
 		assertNotNull(c);
 	}
 
-	 @Test
-	 public void shouldNotAddHighlightQuery() throws Exception {
-		 
-		 final SearchComponent c = h.getCore().getSearchComponent(
-					"highlightQuery");
-		 
-		 ResponseBuilder rb = new ResponseBuilder(req(),  new SolrQueryResponse(), Arrays.asList(c));
-		 rb.doHighlights = false;
-		 c.process(rb);
-		 
-		 assertNull(rb.getHighlightQuery());
-	 }
-	 
-	
-	 @Test
-	 public void shouldAddHighlightQuery() throws Exception {
-		 String query = "irobot AND roomba";
-		 SolrQueryRequest q = req("q", query, "defType", "edismax");
-		 final SearchComponent c = h.getCore().getSearchComponent(
-					"highlightQuery");
-		 ResponseBuilder rb = new ResponseBuilder(q,  new SolrQueryResponse(), Arrays.asList(c));
-		 rb.doHighlights = true;
-		 
-		 c.process(rb);
-		 
-		 assertEquals("+text:irobot +text:roomba", rb.getHighlightQuery().toString());
-	 }
+	@Test
+	public void shouldNotAddHighlightQuery() throws Exception {
 
+		final SearchComponent c = h.getCore().getSearchComponent(
+				"highlightQuery");
 
-	
-	 @Test
-	 public void shouldIdentifySchemaFieldsInQuery() throws Exception {
-	
-		 String query = "hadoop AND solr AND title:test";
-		 SolrQueryRequest q = req("q", query, "defType", "edismax");
-		 final SearchComponent c = h.getCore().getSearchComponent(
-					"highlightQuery");
-		 ResponseBuilder rb = new ResponseBuilder(q,  new SolrQueryResponse(), Arrays.asList(c));
-		 rb.doHighlights = true;
-		 
-		 c.process(rb);
-		 
-		 assertEquals("+text:hadoop +text:solr", rb.getHighlightQuery().toString());
-		 
-	 }
+		ResponseBuilder rb = new ResponseBuilder(req(),
+				new SolrQueryResponse(), Arrays.asList(c));
+		rb.doHighlights = false;
+		c.process(rb);
 
-	
-	 @Test
-	 public void shouldAddNoneSchemaFieldsInQueryToHighlightQuery() throws Exception {
+		assertNull(rb.getHighlightQuery());
+	}
 
-		 String query = "hadoop AND solr";
-		 SolrQueryRequest q = req("q", query, "defType", "edismax");
-		 final SearchComponent c = h.getCore().getSearchComponent(
-					"highlightQuery");
-		 ResponseBuilder rb = new ResponseBuilder(q,  new SolrQueryResponse(), Arrays.asList(c));
-		 rb.doHighlights = true;
-		 
-		 c.process(rb);
-		 
-		 assertEquals("+text:hadoop +text:solr", rb.getHighlightQuery().toString());
-	
-	 }
-    @Test
-    public void shouldDeleteFieldsFromQueryWhereValueIsNull() throws Exception {
-    	
-		 String query = "hadoop AND solr NOT title:test OR subject:";
-		 SolrQueryRequest q = req("q", query, "defType", "edismax");
-		 final SearchComponent c = h.getCore().getSearchComponent(
-					"highlightQuery");
-		 ResponseBuilder rb = new ResponseBuilder(q,  new SolrQueryResponse(), Arrays.asList(c));
-		 rb.doHighlights = true;
-		 
-		 c.process(rb);
-		 
-		 assertEquals("+text:hadoop +text:solr", rb.getHighlightQuery().toString());
-    }
+	@Test
+	public void shouldAddHighlightQuery() throws Exception {
+		String query = "irobot AND roomba";
+		SolrQueryRequest q = req("q", query, "defType", "edismax");
+		final SearchComponent c = h.getCore().getSearchComponent(
+				"highlightQuery");
+		ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
+				Arrays.asList(c));
+		rb.doHighlights = true;
 
-    @Test
-    public void shouldDeleteSpecialCharsFromQuery() throws Exception {
-		 String query = "( hadoop AND solr ) AND \" title:test \"";
-		 SolrQueryRequest q = req("q", query, "defType", "edismax");
-		 final SearchComponent c = h.getCore().getSearchComponent(
-					"highlightQuery");
-		 ResponseBuilder rb = new ResponseBuilder(q,  new SolrQueryResponse(), Arrays.asList(c));
-		 rb.doHighlights = true;
-		 
-		 c.process(rb);
-		 
-		 assertEquals("+text:hadoop +text:solr", rb.getHighlightQuery().toString());
-    }
-    
+		c.process(rb);
+
+		assertEquals("+text:irobot +text:roomba", rb.getHighlightQuery()
+				.toString());
+	}
+
+	@Test
+	public void shouldIdentifySchemaFieldsInQuery() throws Exception {
+
+		String query = "hadoop AND solr AND title:test";
+		SolrQueryRequest q = req("q", query, "defType", "edismax");
+		final SearchComponent c = h.getCore().getSearchComponent(
+				"highlightQuery");
+		ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
+				Arrays.asList(c));
+		rb.doHighlights = true;
+
+		c.process(rb);
+
+		assertEquals("+text:hadoop +text:solr", rb.getHighlightQuery()
+				.toString());
+
+	}
+
+	@Test
+	public void shouldAddNoneSchemaFieldsInQueryToHighlightQuery()
+			throws Exception {
+
+		String query = "hadoop AND solr";
+		SolrQueryRequest q = req("q", query, "defType", "edismax");
+		final SearchComponent c = h.getCore().getSearchComponent(
+				"highlightQuery");
+		ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
+				Arrays.asList(c));
+		rb.doHighlights = true;
+
+		c.process(rb);
+
+		assertEquals("+text:hadoop +text:solr", rb.getHighlightQuery()
+				.toString());
+
+	}
+
+	@Test
+	public void shouldDeleteFieldsFromQueryWhereValueIsNull() throws Exception {
+
+		String query = "hadoop AND solr NOT title:test OR subject:";
+		SolrQueryRequest q = req("q", query, "defType", "edismax");
+		final SearchComponent c = h.getCore().getSearchComponent(
+				"highlightQuery");
+		ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
+				Arrays.asList(c));
+		rb.doHighlights = true;
+
+		c.process(rb);
+
+		assertEquals("+text:hadoop +text:solr", rb.getHighlightQuery()
+				.toString());
+	}
+
+	@Test
+	public void shouldDeleteSpecialCharsFromQuery() throws Exception {
+		String query = "( hadoop AND solr ) AND \" title:test \"";
+		SolrQueryRequest q = req("q", query, "defType", "edismax");
+		final SearchComponent c = h.getCore().getSearchComponent(
+				"highlightQuery");
+		ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
+				Arrays.asList(c));
+		rb.doHighlights = true;
+
+		c.process(rb);
+
+		assertEquals("+text:hadoop +text:solr", rb.getHighlightQuery()
+				.toString());
+	}
+
 }
-
-
-//http://memo-test-solr-2:8080/solr/shard_2012_01/select/?tie=0.01&hl.simple.pre=[[_HIGHLIGHT_]]&q.alt=*:*&hl=true&shard.url=memo-test-solr-2:8080/solr/shard_2012_01&NOW=1329320361355&hl.simple.post=[[/_HIGHLIGHT_]]&fq=pubDate:[%222012-01-15T15:39:21Z%22+TO+%222012-02-15T15:39:21Z%22]&hl.fragsize=400&mm=%0A++++++++++++++++++++++++0%0A++++++++++++++++++++&ids=de.golem.video/wirtschaft/5744/irobot-chef-colin-angle-ueber-roomba-770-und-780.html&qf=title+text+author+url&hl.fl=title+text+author+url&defType=edismax&rows=20&pf=%0A++++++++++++++++++++++++text%0A++++++++++++++++++++&hl.snippets=100&start=0&q=irobot+AND+roomba+AND+language:de&isShard=true&ps=100
