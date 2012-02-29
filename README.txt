@@ -31,6 +31,11 @@ lib Folder to your jar-file
 	<str>highlightQuery</str>
 </arr>
 
+Register the query parser.
+<queryParser name="memoparser" class="com.memonews.solr.search.HighlightQParserPlugin">
+	<!-- comma separated values eg. title,name -->
+ 	<str name="fields">title</str>
+ </queryParser>
 
 Restart the server
 =====================
