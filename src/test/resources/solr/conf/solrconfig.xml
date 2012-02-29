@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8" ?>
 <!--
  Licensed to the Apache Software Foundation (ASF) under one or more
  contributor license agreements.  See the NOTICE file distributed with
@@ -58,17 +57,17 @@
        the classpath, this is useful for including all jars in a
        directory.
     -->
-  <lib dir="../../contrib/extraction/lib" />
+  <lib dir="/memo/solr/src/solr/contrib/extraction/lib" />
   <!-- When a regex is specified in addition to a directory, only the
        files in that directory which completely match the regex
        (anchored on both ends) will be included.
     -->
-  <lib dir="../../dist/" regex="apache-solr-cell-\d.*\.jar" />
-  <lib dir="../../dist/" regex="apache-solr-clustering-\d.*\.jar" />
+  <lib dir="/memo/solr/src/solr/dist/" regex="apache-solr-cell-\d.*\.jar" />
+  <lib dir="/memo/solr/src/solr/dist/" regex="apache-solr-clustering-\d.*\.jar" />
   <!-- If a dir option (with or without a regex) is used and nothing
        is found that matches, it will be ignored
     -->
-  <lib dir="../../contrib/clustering/lib/" />
+  <lib dir="/memo/solr/src/solr/contrib/clustering/lib/" />
   <lib dir="/total/crap/dir/ignored" /> 
   <!-- an exact path can be used to specify a specific file.  This
        will cause a serious error to be logged if it can't be loaded.
@@ -76,9 +75,8 @@
   <!--
   <lib path="../a-jar-that-does-not-exist.jar" /> 
   -->
-  <!-- PATH to highlightQueryComponent.jar-->
   <lib dir="/../lib/"/>  
-  
+
   <!-- Data Directory
 
        Used to specify an alternate directory to hold all index data
@@ -86,7 +84,7 @@
        replication is in use, this should match the replication
        configuration.
     -->
-  <dataDir>${solr.data.dir:}</dataDir>
+    <dataDir>${solr.data.dir:}</dataDir>
 
 
   <!-- The DirectoryFactory to use for indexes.
@@ -145,9 +143,9 @@
          Other implementations of MergePolicy must have a no-argument
          constructor
       -->
-    <!--
+    
        <mergePolicy class="org.apache.lucene.index.TieredMergePolicy"/>
-       -->
+      
 
     <!-- Expert: Merge Scheduler
 
@@ -156,9 +154,9 @@
          can perform merges in the background using separate threads.
          The SerialMergeScheduler (Lucene 2.2 default) does not.
      -->
-    <!-- 
+    
        <mergeScheduler class="org.apache.lucene.index.ConcurrentMergeScheduler"/>
-       -->
+      
 	  
     <!-- LockFactory 
 
@@ -184,7 +182,7 @@
     <!-- Expert: Controls how often Lucene loads terms into memory
          Default is 128 and is likely good for most everyone.
       -->
-    <!-- <termIndexInterval>256</termIndexInterval> -->
+    <termIndexInterval>256</termIndexInterval>
   </indexDefaults>
 
   <!-- Main Index
@@ -290,13 +288,13 @@
          maxTime - Maximum amount of time that is allowed to pass
                    since a document was added before automaticly
                    triggering a new commit. 
-      -->
     
+  -->  
        <autoCommit> 
-         <maxDocs>1000</maxDocs>
-         <maxTime>60000</maxTime> 
+         <maxDocs>10000</maxDocs>
+         <maxTime>180000</maxTime> 
        </autoCommit>
-    
+   
 
     <!-- SoftAutoCommit
 
@@ -309,13 +307,14 @@
          maxTime - Maximum amount of time in ms that is allowed to pass
                    since a document was added before automaticly
                    triggering a new soft commit. 
-      -->
+      
        <autoSoftCommit> 
-         <maxDocs>1000</maxDocs>
+         <maxDocs>1</maxDocs>
          <maxTime>1000</maxTime> 
        </autoSoftCommit>
-
-    <!-- Update Related Event Listeners
+       
+       
+        Update Related Event Listeners
          
          Various IndexWriter related events can trigger Listeners to
          take actions.
@@ -400,7 +399,7 @@
          be based on the last SolrCore to be initialized.
          
       -->
-    <maxBooleanClauses>10000</maxBooleanClauses>
+    <maxBooleanClauses>1024</maxBooleanClauses>
 
 
     <!-- Solr Internal Query Caches
@@ -528,12 +527,12 @@
         then documents 0 through 49 will be collected and cached.  Any further
         requests in that range can be satisfied via the cache.  
      -->
-   <queryResultWindowSize>100</queryResultWindowSize>
+   <queryResultWindowSize>200</queryResultWindowSize>
 
    <!-- Maximum number of documents to cache for any entry in the
         queryResultCache. 
      -->
-   <queryResultMaxDocsCached>100</queryResultMaxDocsCached>
+   <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
 
    <!-- Query Related Event Listeners
 
@@ -577,7 +576,7 @@
          warming searcher and use it.  If "false" then all requests
          will block until the first searcher is done warming.
       -->
-    <useColdSearcher>false</useColdSearcher>
+    <useColdSearcher>true</useColdSearcher>
 
     <!-- Max Warming Searchers
          
@@ -772,9 +771,8 @@
          <str>nameOfCustomComponent2</str>
        </arr>
       -->
-
     </requestHandler>
-    <requestHandler name="edismax" class="solr.SearchHandler" default="true">
+<requestHandler name="edismax" class="solr.SearchHandler" default="true">
         <lst name="defaults">
            <str name="echoParams">explicit</str>
            <str name="defType">edismax</str>
@@ -798,8 +796,8 @@
                     <str name="q.alt">*:*</str>
                 </lst>
         <arr name="first-components">
-                <str>highlightQuery</str>
-       </arr>
+         	<str>highlightQuery</str>
+       </arr>      
 </requestHandler>
 
   <!-- A Robust Example 
@@ -1125,7 +1123,7 @@
        always be executed after the "last-components" 
        
      -->
-      <searchComponent name="highlightQuery" class="com.memonews.solr.handler.component.HighlightQueryComponent" />
+   <searchComponent name="highlightQuery" class="com.memonews.solr.handler.component.HighlightQueryComponent" />
    <!-- Spell Check
 
         The spell check component can return a list of alternative spelling
@@ -1133,8 +1131,6 @@
 
         http://wiki.apache.org/solr/SpellCheckComponent
      -->
-  
-     
   <searchComponent name="spellcheck" class="solr.SpellCheckComponent">
 
     <str name="queryAnalyzerFieldType">textSpell</str>
@@ -1229,6 +1225,7 @@
     </arr>
   </requestHandler>
 
+
   <!-- Term Vector Component
 
        http://wiki.apache.org/solr/TermVectorComponent
@@ -1251,7 +1248,7 @@
     </arr>
   </requestHandler>
 
-  
+
   <!-- Terms Component
 
        http://wiki.apache.org/solr/TermsComponent
@@ -1271,30 +1268,6 @@
     </arr>
   </requestHandler>
 
-
-  <!-- Query Elevation Component
-
-       http://wiki.apache.org/solr/QueryElevationComponent
-
-       a search component that enables you to configure the top
-       results for a given query regardless of the normal lucene
-       scoring.
-    -->
-  <searchComponent name="elevator" class="solr.QueryElevationComponent" >
-    <!-- pick a fieldType to analyze queries -->
-    <str name="queryFieldType">string</str>
-    <str name="config-file">elevate.xml</str>
-  </searchComponent>
-
-  <!-- A request handler for demonstrating the elevator component -->
-  <requestHandler name="/elevate" class="solr.SearchHandler" startup="lazy">
-    <lst name="defaults">
-      <str name="echoParams">explicit</str>
-    </lst>
-    <arr name="last-components">
-      <str>elevator</str>
-    </arr>
-  </requestHandler>
 
   <!-- Highlighting Component
 
@@ -1353,7 +1326,7 @@
       <!-- default tag FragmentsBuilder -->
       <fragmentsBuilder name="default" 
                         default="true"
-                        class="solr.highlight.ScoreOrderFragmentsBuilder">
+                        class="solr.highlight.SimpleFragmentsBuilder">
         <!-- 
         <lst name="defaults">
           <str name="hl.multiValuedSeparatorChar">/</str>
@@ -1363,7 +1336,7 @@
 
       <!-- multi-colored tag FragmentsBuilder -->
       <fragmentsBuilder name="colored" 
-                        class="solr.highlight.ScoreOrderFragmentsBuilder">
+                        class="solr.highlight.SimpleFragmentsBuilder">
         <lst name="defaults">
           <str name="hl.tag.pre"><![CDATA[
                <b style="background:yellow">,<b style="background:lawgreen">,
@@ -1462,7 +1435,11 @@
   <!--
      <queryParser name="myparser" class="com.mycompany.MyQParserPlugin"/>
     -->
-
+	<queryParser name="memoparser" class="com.memonews.solr.search.HighlightQParserPlugin">
+ 		<!-- comma separated values eg. title,name -->
+ 		<str name="fields">title</str>
+ 	</queryParser>
+	
   <!-- Function Parsers
 
        http://wiki.apache.org/solr/FunctionQuery

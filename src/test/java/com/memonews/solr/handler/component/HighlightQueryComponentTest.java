@@ -36,130 +36,95 @@ import org.junit.Test;
  */
 public class HighlightQueryComponentTest extends SolrTestCaseJ4 {
 
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		initCore("solrconfig.xml", "schema.xml");
-	}
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+	initCore("solrconfig.xml", "schema.xml");
+    }
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-	}
+    @Override
+    public void setUp() throws Exception {
+	super.setUp();
+    }
 
-	@Override
-	public void tearDown() throws Exception {
-		// if you override setUp or tearDown, you better call
-		// the super classes version
-		clearIndex();
-		super.tearDown();
-	}
+    @Override
+    public void tearDown() throws Exception {
+	// if you override setUp or tearDown, you better call
+	// the super classes version
+	clearIndex();
+	super.tearDown();
+    }
 
-	@Test
-	public void shouldLoadConfig() throws Exception {
+    @Test
+    public void shouldLoadConfig() throws Exception {
 
-		final SearchComponent c = h.getCore().getSearchComponent(
-				"highlightQuery");
-		assertNotNull(c);
-	}
+	final SearchComponent c = h.getCore().getSearchComponent(
+		"highlightQuery");
+	assertNotNull(c);
+    }
 
-	@Test
-	public void shouldNotAddHighlightQuery() throws Exception {
+    @Test
+    public void shouldAddHighlightQuery() throws Exception {
+	String query = "apache AND solr";
+	SolrQueryRequest q = req("q", query, "defType", "edismax");
+	final SearchComponent c = h.getCore().getSearchComponent(
+		"highlightQuery");
+	ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
+		Arrays.asList(c));
+	rb.doHighlights = true;
 
-		final SearchComponent c = h.getCore().getSearchComponent(
-				"highlightQuery");
+	c.process(rb);
 
-		ResponseBuilder rb = new ResponseBuilder(req(),
-				new SolrQueryResponse(), Arrays.asList(c));
-		rb.doHighlights = false;
-		c.process(rb);
+	assertEquals("+text:apache +text:solr", rb.getHighlightQuery()
+		.toString());
+    }
 
-		assertNull(rb.getHighlightQuery());
-	}
+    @Test
+    public void shouldNotAddHighlightQuery() throws Exception {
 
-	@Test
-	public void shouldAddHighlightQuery() throws Exception {
-		String query = "irobot AND roomba";
-		SolrQueryRequest q = req("q", query, "defType", "edismax");
-		final SearchComponent c = h.getCore().getSearchComponent(
-				"highlightQuery");
-		ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
-				Arrays.asList(c));
-		rb.doHighlights = true;
+	final SearchComponent c = h.getCore().getSearchComponent(
+		"highlightQuery");
 
-		c.process(rb);
+	ResponseBuilder rb = new ResponseBuilder(req(),
+		new SolrQueryResponse(), Arrays.asList(c));
+	rb.doHighlights = false;
+	c.process(rb);
 
-		assertEquals("+text:irobot +text:roomba", rb.getHighlightQuery()
-				.toString());
-	}
+	assertNull(rb.getHighlightQuery());
+    }
 
-	@Test
-	public void shouldIdentifySchemaFieldsInQuery() throws Exception {
+    @Test
+    public void shouldRemoveFieldFromQuery() throws Exception {
 
-		String query = "hadoop AND solr AND title:test";
-		SolrQueryRequest q = req("q", query, "defType", "edismax");
-		final SearchComponent c = h.getCore().getSearchComponent(
-				"highlightQuery");
-		ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
-				Arrays.asList(c));
-		rb.doHighlights = true;
+	String query = "apache AND solr NOT title:test OR name:tz";
+	SolrQueryRequest q = req("q", query, "defType", "edismax");
+	final SearchComponent c = h.getCore().getSearchComponent(
+		"highlightQuery");
+	ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
+		Arrays.asList(c));
+	rb.doHighlights = true;
 
-		c.process(rb);
+	c.process(rb);
 
-		assertEquals("+text:hadoop +text:solr", rb.getHighlightQuery()
-				.toString());
+	assertEquals("+text:apache +text:solr -() name:tz", rb
+		.getHighlightQuery().toString());
+    }
 
-	}
+    @Test
+    public void shouldRomoveFieldsFromQuery() throws Exception {
+	String qstr = "title:\"The Right Way\"~10 AND text:\"go for it\" OR name:[20020101 TO 20030101] NOT title:{Aida TO Carmen} OR title:(+return +\"pink panther\")";
 
-	@Test
-	public void shouldAddNoneSchemaFieldsInQueryToHighlightQuery()
-			throws Exception {
+	SolrQueryRequest q = req("q", qstr, "defType", "edismax");
+	final SearchComponent c = h.getCore().getSearchComponent(
+		"highlightQuery");
+	ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
+		Arrays.asList(c));
+	rb.doHighlights = true;
 
-		String query = "hadoop AND solr";
-		SolrQueryRequest q = req("q", query, "defType", "edismax");
-		final SearchComponent c = h.getCore().getSearchComponent(
-				"highlightQuery");
-		ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
-				Arrays.asList(c));
-		rb.doHighlights = true;
+	c.process(rb);
 
-		c.process(rb);
+	assertEquals(
+		"+() text:\"go for it\" name:[20020101 TO 20030101] -title:{aida TO carmen} (+() +())",
+		rb.getHighlightQuery().toString());
 
-		assertEquals("+text:hadoop +text:solr", rb.getHighlightQuery()
-				.toString());
-
-	}
-
-	@Test
-	public void shouldDeleteFieldsFromQueryWhereValueIsNull() throws Exception {
-
-		String query = "hadoop AND solr NOT title:test OR subject:";
-		SolrQueryRequest q = req("q", query, "defType", "edismax");
-		final SearchComponent c = h.getCore().getSearchComponent(
-				"highlightQuery");
-		ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
-				Arrays.asList(c));
-		rb.doHighlights = true;
-
-		c.process(rb);
-
-		assertEquals("+text:hadoop +text:solr", rb.getHighlightQuery()
-				.toString());
-	}
-
-	@Test
-	public void shouldDeleteSpecialCharsFromQuery() throws Exception {
-		String query = "( hadoop AND solr ) AND \" title:test \"";
-		SolrQueryRequest q = req("q", query, "defType", "edismax");
-		final SearchComponent c = h.getCore().getSearchComponent(
-				"highlightQuery");
-		ResponseBuilder rb = new ResponseBuilder(q, new SolrQueryResponse(),
-				Arrays.asList(c));
-		rb.doHighlights = true;
-
-		c.process(rb);
-
-		assertEquals("+text:hadoop +text:solr", rb.getHighlightQuery()
-				.toString());
-	}
-
+    }
 }

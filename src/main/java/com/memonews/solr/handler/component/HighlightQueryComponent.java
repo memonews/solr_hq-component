@@ -21,121 +21,99 @@
 package com.memonews.solr.handler.component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.NamedList;
 import org.apache.solr.handler.component.ResponseBuilder;
 import org.apache.solr.handler.component.SearchComponent;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.schema.IndexSchema;
-import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.QParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * This search component takes all given query terms except the fielded terms
- * and sets the highlight query directly on the <code>ResponseBuilder</code>.
+ * This search component takes all given query terms and parse them with the
+ * <code>HighlightQParser</code> and sets the highlight query directly on the
+ * <code>ResponseBuilder</code>.
  * 
- * A fielded term is defined by the field name followed by a colon ":"
- * and then the term you are looking for.
+ * A fielded term is defined by the field name followed by a colon ":" and then
+ * the term you are looking for.
  * 
  * Since Solr 4.0
  * 
  */
 public class HighlightQueryComponent extends SearchComponent {
+    private static final Logger LOG = LoggerFactory
+	    .getLogger(HighlightQueryComponent.class);
 
-	private final Set<String> charset = new HashSet<String>(0);
+    private static final String NAME = "memoparser";
 
-	public HighlightQueryComponent() {
-
-		final String[] collection = new String[] { "AND", "OR", "NOT", "(",
-				")", "\"" };
-		this.charset.addAll(Arrays.asList(collection));
+    private Query parseAndCleanQuery(final String query,
+	    final SolrQueryRequest req, final String defaultType)
+	    throws ParseException {
+	QParser parser = QParser.getParser(query, defaultType, req);
+	Query highlightQuery = parser.getHighlightQuery();
+	if (LOG.isDebugEnabled()) {
+	    LOG.debug("Parsed and cleaned query: " + highlightQuery.toString());
 	}
+	return highlightQuery;
+    }
 
-	@Override
-	public void prepare(final ResponseBuilder rb) throws IOException {
-		// do nothing
-	}
+    @Override
+    @SuppressWarnings("rawtypes")
+    public void init(NamedList args) {
+	super.init(args);
+    }
 
-	@Override
-	public void process(final ResponseBuilder rb) throws IOException {
+    @Override
+    public void prepare(final ResponseBuilder rb) throws IOException {
+	// do nothing
+    }
 
-		if (rb.doHighlights) {
+    @Override
+    public void process(final ResponseBuilder rb) throws IOException {
 
-			final List<String> terms = new ArrayList<String>(0);
-			final SolrQueryRequest req = rb.req;
-			final IndexSchema schema = req.getSchema();
-			final Map<String, SchemaField> fields = schema.getFields();
-			final SolrParams params = req.getParams();
-			final String query = params.get(CommonParams.Q);
-			final String[] splitQuery = query.split(" ");
+	if (rb.doHighlights) {
+	    final SolrQueryRequest req = rb.req;
+	    final SolrParams params = req.getParams();
+	    final String qstr = params.get(CommonParams.Q);
+	    if (LOG.isDebugEnabled()) {
+		LOG.info("Original query: " + qstr);
+	    }
 
-			for (String split : splitQuery) {
-				if (!charset.contains(split)) {
-					if (split.contains(":")) {
-						// is a field?
-						final String[] splitParams = split.split(":");
-						if (splitParams.length == 2) {
-							if (!fields.containsKey(splitParams[0])) {
-								terms.add(split);
-							}
-						}
-					} else {
-						split = StringUtils.remove(split, "\"");
-						terms.add(split);
-					}
-				}
-			}
-
-			final StringBuffer hlQuery = new StringBuffer();
-
-			for (int i = 0; i < terms.size(); i++) {
-				hlQuery.append(terms.get(i));
-				if (i != terms.size() - 1) {
-					hlQuery.append(" AND ");
-				}
-			}
-
-			if (hlQuery.length() > 0) {
-				try {
-					QParser parser = QParser.getParser(hlQuery.toString(),
-							null, rb.req);
-					rb.setHighlightQuery(parser.getHighlightQuery());
-				} catch (ParseException e) {
-					throw new SolrException(
-							SolrException.ErrorCode.BAD_REQUEST, e);
-				}
-			}
+	    try {
+		Query parsedQuery = parseAndCleanQuery(qstr, req, NAME);
+		if (parsedQuery != null) {
+		    rb.setHighlightQuery(parsedQuery);
 		}
+	    } catch (ParseException e1) {
+		throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e1);
+	    }
 	}
+    }
 
-	@Override
-	public String getDescription() {
-		return null;
-	}
+    @Override
+    public String getDescription() {
+	return null;
+    }
 
-	@Override
-	public String getSourceId() {
-		return null;
-	}
+    @Override
+    public String getSourceId() {
+	return null;
+    }
 
-	@Override
-	public String getSource() {
-		return null;
-	}
+    @Override
+    public String getSource() {
+	return null;
+    }
 
-	@Override
-	public String getVersion() {
-		return null;
-	}
+    @Override
+    public String getVersion() {
+	return null;
+    }
 
 }
