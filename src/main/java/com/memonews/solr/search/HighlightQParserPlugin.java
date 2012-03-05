@@ -115,4 +115,44 @@ class HighlightQueryParserNew extends SolrQueryParser {
 		}
 		return super.getFieldQuery(field, queryText, quoted);
 	}
+
+	@Override
+	protected Query getRangeQuery(String field, String part1, String part2,
+			boolean startInclusive, boolean endInclusive) throws ParseException {
+		if (fieldNames.contains(field)) {
+			return new BooleanQuery();
+		}
+		return super.getRangeQuery(field, part1, part2, startInclusive, endInclusive);
+	}
+
+
+
+	@Override
+	protected Query getPrefixQuery(String field, String termStr)
+			throws ParseException {
+		if (fieldNames.contains(field)) {
+			return new BooleanQuery();
+		}
+		return super.getPrefixQuery(field, termStr);
+	}
+
+	@Override
+	protected Query getWildcardQuery(String field, String termStr)
+			throws ParseException {
+		if (fieldNames.contains(field)) {
+			return new BooleanQuery();
+		}
+		return super.getWildcardQuery(field, termStr);
+	}
+
+	@Override
+	protected Query getRegexpQuery(String field, String termStr)
+			throws ParseException {
+		if (fieldNames.contains(field)) {
+			return new BooleanQuery();
+		}
+		return super.getRegexpQuery(field, termStr);
+	}
+	
+	
 }

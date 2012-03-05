@@ -123,7 +123,7 @@ public class HighlightQueryComponentTest extends SolrTestCaseJ4 {
 	c.process(rb);
 
 	assertEquals(
-		"+() text:\"go for it\" name:[20020101 TO 20030101] -title:{aida TO carmen} (+() +())",
+		"+() text:\"go for it\" name:[20020101 TO 20030101] -() (+() +())",
 		rb.getHighlightQuery().toString());
 
     }
